@@ -23,8 +23,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         imagePicker.delegate = self
         // Launch Camera
-        // imagePicker.sourceType = .camera
-        imagePicker.sourceType = .photoLibrary
+        imagePicker.sourceType = .camera
+        // imagePicker.sourceType = .photoLibrary
         imagePicker.allowsEditing = false
     }
     
@@ -35,6 +35,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             guard let ciImage = CIImage(image: userPickedImage) else {
                 fatalError("Could not convert to CIImage")
             }
+            detect(image: ciImage)
         }
         
         imagePicker.dismiss(animated: true, completion: nil)
@@ -51,6 +52,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             guard let results = request.results as? [VNClassificationObservation] else {
                 fatalError("Unable to load images.")
             }
+            
+            print(results)
         }
         
         let handler = VNImageRequestHandler(ciImage: image)
