@@ -53,7 +53,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 fatalError("Unable to load images.")
             }
             
-            print(results)
+            if let firstResult = results.first {
+                if firstResult.identifier.contains("hotdog") {
+                    self.navigationItem.title = "HOTDOG! 🤩"
+                } else {
+                    self.navigationItem.title = "Not Hotdog! ☹️"
+                }
+            }
         }
         
         let handler = VNImageRequestHandler(ciImage: image)
