@@ -23,16 +23,43 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         imagePicker.delegate = self
         // Launch Camera
-        imagePicker.sourceType = .camera
+        // imagePicker.sourceType = .camera
+        imagePicker.sourceType = .photoLibrary
         imagePicker.allowsEditing = false
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let userPickedImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             imageView.image = userPickedImage
+            
+            guard let ciImage = CIImage(image: userPickedImage) else {
+                fatalError("Could not convert to CIImage")
+            }
         }
         
         imagePicker.dismiss(animated: true, completion: nil)
+    }
+    
+    func detect(image: CIImage) {
+        let config = MLModelConfiguration()
+        guard let coreMLModel = try? Inceptionv3(configuration: config),
+              let visionModel = try? VNCoreMLModel(for: coreMLModel.model) else {
+            fatalError("Loading CoreML model failed.")
+        }
+        
+        let request = VNCoreMLRequest(model: visionModel) { request, error in
+            guard let results = request.results as? [VNClassificationObservation] else {
+                fatalError("Unable to load images.")
+            }
+        }
+        
+        let handler = VNImageRequestHandler(ciImage: image)
+        
+        do {
+            try handler.perform([request])
+        } catch {
+            print(error)
+        }
     }
     
     @IBAction func cameraTapped(_ sender: UIBarButtonItem) {
@@ -50,7 +77,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 // MARK: - PHPicker Configurations (PHPickerViewControllerDelegate)
 
-// Use this class to access the User photolibray
+// Use this class to access the User photolibray in newer versions of iOS (17+)
 extension ViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
          picker.dismiss(animated: true, completion: .none)
